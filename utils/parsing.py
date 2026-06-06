@@ -20,6 +20,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 import argparse
 import numpy as np
 import os
+import sys
 from typing import Tuple, Dict, Any, Optional, List
 import yaml
 
@@ -45,6 +46,13 @@ def string2bool(input):
         return True
     elif input == 'False':
         return False
+    
+def string2none(input):
+    """
+    Convert string input to None
+    """
+    if input == 'None':
+        return None
 
 def int_range(min_val, max_val, min_incl, max_incl, negative_one):
     """
@@ -234,6 +242,10 @@ def load_Args() -> Tuple[argparse.Namespace, np.ndarray, np.ndarray, dict]:
                              help = "Start time (ps) [default = YAML]")
     traj_frames.add_argument('-e', '--t_max', type = float_range(0.0, np.inf, True, False, True), default = config['t_max'],
                              help = "End time (ps) [default = YAML]")
+    traj_frames.add_argument('-bi', '--start_idx', type = string2none or int, default = config['start_idx'],
+                             help = "Start index [default = YAML]")
+    traj_frames.add_argument('-ei', '--end_idx', type = string2none or int, default = config['end_idx'],
+                             help = "End index [default = YAML]")
     traj_frames.add_argument('-n', '--N_frames', type = int_range(0.0, np.inf, False, False, True), default = config['N_frames'],
                              help = "Number of frames to analyze [default = YAML]")
     traj_frames.add_argument('--N_repeats', type = int_range(0.0, np.inf, False, False, False), default = config['N_repeats'],

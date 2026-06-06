@@ -179,8 +179,24 @@ def load_Trajectory(
 
         dt = np.round((uta.trajectory[1].time - uta.trajectory[0].time),3)
 
-        start_idx = int((args.t_min - uta.trajectory[0].time) / dt)
-        end_idx = int((args.t_max - uta.trajectory[0].time) / dt)
+        # allow for input frame indices rather than time in ps, default is -1 which assumes time input
+        if args.start_idx is None and args.end_idx is None: 
+            start_idx = int((args.t_min - uta.trajectory[0].time) / dt)
+            end_idx = int((args.t_max - uta.trajectory[0].time) / dt)
+        elif args.start_idx is not None and args.end_idx is not None:
+
+            if args.start_idx < 0:
+                start_idx = len(uta.trajectory) - 1 + args.start_idx # like list indexing, negative indices count from the end of the trajectory
+            else:
+                start_idx = args.start_idx
+
+            if args.end_idx < 0:
+                end_idx = len(uta.trajectory) - 1 + args.end_idx # like list indexing, negative indices count from the end of the trajectory
+            else:
+                end_idx = args.end_idx
+
+        else: raise ValueError("Must provide both start_idx and end_idx or neither to use time input")
+
         available_frames = end_idx - start_idx + 1
 
         if available_frames < args.N_frames: raise ValueError(f"Not enough frames within the time range provided: {args.t_min}-{args.t_max} ps = {available_frames} frames")
