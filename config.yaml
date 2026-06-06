@@ -31,6 +31,14 @@ t_min: -1
 #     Can overwrite when calling PARSE.py using -e or --t_max
 t_max: -1
 
+# Default start index for analysis (None defaults to time input, i.e., the index corresponding to t_min)
+#     Can overwrite when calling PARSE.py using -bi or --start_idx
+start_idx: 0
+
+# Default end index for analysis (None defaults to time input, i.e., the index corresponding to t_max)
+#     Can overwrite when calling PARSE.py using -ei or --end_idx
+end_idx: -1
+
 # Default number of frames to analyze (-1 assumes N_frames = N_threads, N_frames = 1 for GRO file inputs)
 #     For efficiency, N_frames should be a multiple of the number of threads, --N_threads
 #     NOTE: --N_frames 1 always uses the last frame in the trajectory (--t_max) if multiple frames are provided.
