@@ -847,6 +847,13 @@ def string2bool(input):
         return True
     elif input == 'False':
         return False
+    
+def string2none(input):
+    """
+    Convert string input to None
+    """
+    if input == 'None':
+        return None
 
 def int_range(min_val, max_val, min_incl, max_incl, negative_one):
     """
@@ -1033,6 +1040,10 @@ def load_Args() -> Tuple[argparse.Namespace, np.ndarray, np.ndarray, dict]:
                              help = "Start time (ps) [default = YAML]")
     traj_frames.add_argument('-e', '--t_max', type = float_range(0.0, np.inf, True, False, True), default = config['t_max'],
                              help = "End time (ps) [default = YAML]")
+    traj_frames.add_argument('-bi', '--start_idx', type = string2none or int, default = config['start_idx'],
+                             help = "Start index [default = YAML]")
+    traj_frames.add_argument('-ei', '--end_idx', type = string2none or int, default = config['end_idx'],
+                             help = "End index [default = YAML]")
     traj_frames.add_argument('-n', '--N_frames', type = int_range(0.0, np.inf, False, False, True), default = config['N_frames'],
                              help = "Number of frames to analyze [default = YAML]")
     traj_frames.add_argument('--N_repeats', type = int_range(0.0, np.inf, False, False, False), default = config['N_repeats'],
@@ -1260,8 +1271,24 @@ def load_Trajectory(args: argparse.Namespace, Size_arr: np.ndarray, Dummy_atoms:
 
         dt = np.round((uta.trajectory[1].time - uta.trajectory[0].time),3)
 
-        start_idx = int((args.t_min - uta.trajectory[0].time) / dt)
-        end_idx = int((args.t_max - uta.trajectory[0].time) / dt)
+        # allow for input frame indices rather than time in ps, default is -1 which assumes time input
+        if args.start_idx is None and args.end_idx is None: 
+            start_idx = int((args.t_min - uta.trajectory[0].time) / dt)
+            end_idx = int((args.t_max - uta.trajectory[0].time) / dt)
+        elif args.start_idx is not None and args.end_idx is not None:
+
+            if args.start_idx < 0:
+                start_idx = len(uta.trajectory) - 1 + args.start_idx # like list indexing, negative indices count from the end of the trajectory
+            else:
+                start_idx = args.start_idx
+
+            if args.end_idx < 0:
+                end_idx = len(uta.trajectory) - 1 + args.end_idx # like list indexing, negative indices count from the end of the trajectory
+            else:
+                end_idx = args.end_idx
+
+        else: raise ValueError("Must provide both start_idx and end_idx or neither to use time input")
+        
         available_frames = end_idx - start_idx + 1
 
         if available_frames < args.N_frames: raise ValueError(f"Not enough frames within the time range provided: {args.t_min}-{args.t_max} ps = {available_frames} frames")
